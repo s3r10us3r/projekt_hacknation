@@ -1,5 +1,6 @@
 from transformers import  AutoProcessor, AutoModelForImageTextToText, AutoModelForSeq2SeqLM, AutoTokenizer, BitsAndBytesConfig
 import torch
+import requests
 from langchain_openai import ChatOpenAI
 
 def translate_text(text: str, target_lang='pl'):
@@ -109,6 +110,8 @@ def process_images(processor, vlm, images):
     
     classes = ["dokumenty_i_portfele", "elektronika", "odziez_i_akcesoria", "klucze", "bizuteria_i_zegarki", "pieniadze", "inne"]
     eng_desc = inference_vlm(processor, vlm, images, DESC_PROMPT, DESC_MAX_RESPONSE_LENTGH)
+    print('we have english description')
     class_index = inference_vlm(processor, vlm, images, CL_PROMPT, CL_MAX_RESPONSE_LENTGH)
+    print('agi achieved internally')
     pl_desc = translate_text(eng_desc)
     return {"kategoria": classes[int(class_index)], "opis": pl_desc}
