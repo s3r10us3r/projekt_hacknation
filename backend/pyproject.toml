@@ -8,6 +8,12 @@ dependencies = [
     "flasgger>=0.9.7.1",
     "flask>=3.1.2",
     "jsonschema>=4.25.1",
+    "langchain-openai>=1.1.0",
+    "num2words>=0.5.14",
+    "pillow>=12.0.0",
     "pymongo>=4.15.5",
     "requests>=2.32.5",
+    "torch>=2.9.1",
+    "torchvision>=0.24.1",
+    "transformers>=4.57.3",
 ]

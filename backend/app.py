@@ -3,11 +3,18 @@ from flasgger import Swagger
 from api.db import authenticate_user, insert_lost_item, update_lost_item, get_lost_item_by_id, create_lost_items_table, create_office_accounts_table
 from api.lost_item import LostItem
 from jsonschema.exceptions import ValidationError
+from ai import get_vlm, process_images
+import torch
+from PIL import Image
+
+PROCESSOR, VLM = None, None
+VLM_PATH = "HuggingFaceTB/SmolVLM2-2.2B-Instruct"
 
 
 app = Flask(__name__)
 app.secret_key = 'twoj_sekret'
 swagger = Swagger(app)
+
 
 @app.route('/')
 def healt():
@@ -87,7 +94,11 @@ def form_autocomplete():
     if not files_list or files_list[0].filename == '':
         return jsonify({'error': 'Nie wybrano żadnych plików'}), 400
 
-    result = mock_ai_metoda(files_list)
+    images = [Image.open(file.stream) for file in files_list]
+    if PROCESSOR:
+        process_images(PROCESSOR, VLM, images)
+    else:
+        result = mock_ai_metoda(files_list)
     return jsonify(result), 201
 
 
@@ -96,8 +107,15 @@ def mock_ai_metoda(photos):
 
 
 def run_app():
+    global PROCESSOR, VLM
     print("--- Inicjalizacja Bazy Danych ---")
     create_office_accounts_table()
     create_lost_items_table()
+
+    print('--- Przygotowywanie modeli AI ---')
+    if torch.cuda.is_available():
+        PROCESSOR, VLM = get_vlm(VLM_PATH)
+    else:
+        PROCESSOR, VLM = None, None
     print("--- Start Serwera Flask ---")
     app.run(debug=True, port=5000)
