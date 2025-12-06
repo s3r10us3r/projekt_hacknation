@@ -6,6 +6,8 @@ from jsonschema.exceptions import ValidationError
 from ai import get_vlm, process_images
 import torch
 from PIL import Image
+from cache import cache
+import time
 
 PROCESSOR, VLM = None, None
 VLM_PATH = "HuggingFaceTB/SmolVLM2-2.2B-Instruct"
@@ -94,9 +96,14 @@ def form_autocomplete():
     if not files_list or files_list[0].filename == '':
         return jsonify({'error': 'Nie wybrano żadnych plików'}), 400
 
+    print(cache.hash_file_storage(files_list[0]))
     images = [Image.open(file.stream) for file in files_list]
     if PROCESSOR:
         result = process_images(PROCESSOR, VLM, images)
+        cache.CACHE[cache.hash_file_storage(files_list[0])] = result
+    elif cache.hash_file_storage(files_list[0]) in cache.CACHE:
+        time.sleep(1)
+        return cache.CACHE[cache.hash_file_storage(files_list[0])]
     else:
         result = mock_ai_metoda(files_list)
     return jsonify(result), 201
