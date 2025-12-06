@@ -1,6 +1,7 @@
 from transformers import  AutoProcessor, AutoModelForImageTextToText, AutoModelForSeq2SeqLM, AutoTokenizer, BitsAndBytesConfig
 import torch
 from langchain_openai import ChatOpenAI
+import requests
 
 def translate_text(text: str, target_lang='pl'):
     url = "https://translate.googleapis.com/translate_a/single"
