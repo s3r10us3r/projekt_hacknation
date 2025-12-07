@@ -299,17 +299,14 @@ def get_csv_endpoint(powiat_slug=None):
         description: Brak zasobów dla danego powiatu.
     """
     # Dodać walidację check_powiat_exists(powiat_slug)
-    
     # Przekazanie sluga do funkcji generującej dane
     csv_content, cnt = gen_lost_items_csv(powiat_slug) 
-    
     if cnt == 0:
         return '', 404
     
     md5_hash = get_md5(csv_content)
     if request.headers.get('If-None-Match') == f'"{md5_hash}"':
         return '', 304
-        
     response = make_response(csv_content)
     response.headers['Content-Type'] = 'text/csv; charset=utf-8'
     response.headers['Content-Disposition'] = f'attachment; filename=wykaz_{powiat_slug}.csv'
