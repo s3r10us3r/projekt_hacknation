@@ -5,7 +5,6 @@ DATABASE_NAME = 'hackathon_data.db'
 
 
 def create_office_accounts_table():
-    """Creates the necessary SQLite table for office accounts."""
     conn = None
     try:
         conn = sqlite3.connect(DATABASE_NAME)
@@ -24,10 +23,10 @@ def create_office_accounts_table():
             );
         """)
         conn.commit()
-        print("✅ SQLite table 'office_accounts' ready.")
+        print("SQLite table 'office_accounts' ready.")
         return True
     except sqlite3.Error as e:
-        print(f"❌ Błąd SQLite podczas tworzenia tabeli: {e}")
+        print(f"Błąd SQLite podczas tworzenia tabeli: {e}")
         return False
     finally:
         if conn:
@@ -108,8 +107,7 @@ def create_lost_items_table():
                 data_publikacji TEXT NOT NULL,
                 kategoria TEXT NOT NULL,
                 opis TEXT NOT NULL,
-                adres_znalezienia TEXT,
-                adres_znalezienia_opis TEXT,
+                miejsce_znalezienia TEXT,
                 adres_odbioru TEXT NOT NULL,
                 email_kontaktowy TEXT NOT NULL,
                 telefon_kontaktowy TEXT NOT NULL,
@@ -117,10 +115,10 @@ def create_lost_items_table():
             );
         """)
         conn.commit()
-        print("✅ SQLite tabela 'lost_items' gotowa.")
+        print("SQLite tabela 'lost_items' gotowa.")
         return True
     except sqlite3.Error as e:
-        print(f"❌ Błąd SQLite podczas tworzenia tabeli: {e}")
+        print(f"Błąd SQLite podczas tworzenia tabeli: {e}")
         return False
     finally:
         if conn:
@@ -128,9 +126,6 @@ def create_lost_items_table():
 
 
 def insert_lost_item(lost_item):
-    """
-    Wstawia obiekt klasy LostItem do bazy danych.
-    """
     conn = None
     try:
         conn = sqlite3.connect(DATABASE_NAME)
@@ -146,8 +141,7 @@ def insert_lost_item(lost_item):
             lost_item.kategoria,
             lost_item.opis,
             lost_item.powiat,
-            lost_item.adres_znalezienia,
-            lost_item.adres_znalezienia_opis,
+            lost_item.miejsce_znalezienia,
             lost_item.adres_odbioru,
             lost_item.email_kontaktowy,
             lost_item.telefon_kontaktowy,
@@ -158,14 +152,14 @@ def insert_lost_item(lost_item):
         sql_query = """
             INSERT INTO lost_items (
                 id_ewidencyjny, powiat, data_znalezienia, data_przekazania, data_publikacji,
-                kategoria, opis, powiat, adres_znalezienia, adres_znalezienia_opis,
+                kategoria, opis, powiat, miejsce_znalezienia,
                 adres_odbioru, email_kontaktowy, telefon_kontaktowy, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         
         cursor.execute(sql_query, data_to_insert)
         conn.commit()
-        print(f"✅ Dodano zgubę: {lost_item.id_ewidencyjny}")
+        print(f"Dodano zgubę: {lost_item.id_ewidencyjny}")
         return True
 
     except sqlite3.IntegrityError as e:
@@ -187,7 +181,7 @@ def get_lost_item_by_id(id_ewidencyjny):
     conn = None
     try:
         conn = sqlite3.connect(DATABASE_NAME)
-        conn.row_factory = sqlite3.Row 
+        conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         sql_query = "SELECT * FROM lost_items WHERE id_ewidencyjny = ?"
         cursor.execute(sql_query, (id_ewidencyjny,))
@@ -214,8 +208,6 @@ def update_lost_item(lost_item):
         conn = sqlite3.connect(DATABASE_NAME)
         cursor = conn.cursor()
 
-        # SQL Update Query
-        # We update every field EXCEPT the ID (which is used to find the record)
         sql_query = """
             UPDATE lost_items
             SET
@@ -225,8 +217,7 @@ def update_lost_item(lost_item):
                 kategoria = ?,
                 opis = ?,
                 powiat = ?,
-                adres_znalezienia = ?,
-                adres_znalezienia_opis = ?,
+                miejsce_znalezienia = ?,
                 adres_odbioru = ?,
                 email_kontaktowy = ?,
                 telefon_kontaktowy = ?,
@@ -234,8 +225,6 @@ def update_lost_item(lost_item):
             WHERE id_ewidencyjny = ?
         """
 
-        # Prepare the data tuple. 
-        # CRITICAL: The order must match the SET clause, and id_ewidencyjny must be LAST.
         data_to_update = (
             lost_item.data_znalezienia,
             lost_item.data_przekazania,
@@ -243,13 +232,12 @@ def update_lost_item(lost_item):
             lost_item.kategoria,
             lost_item.opis,
             lost_item.powiat,
-            lost_item.adres_znalezienia,
-            lost_item.adres_znalezienia_opis,
+            lost_item.miejsce_znalezienia,
             lost_item.adres_odbioru,
             lost_item.email_kontaktowy,
             lost_item.telefon_kontaktowy,
             lost_item.status,
-            lost_item.id_ewidencyjny  # <--- ID goes here for the WHERE clause
+            lost_item.id_ewidencyjny
         )
 
         cursor.execute(sql_query, data_to_update)

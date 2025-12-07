@@ -20,6 +20,7 @@ swagger = Swagger(app)
 def healt():
     return jsonify({'message': 'ok'}), 201
 
+
 @app.route('/api/konta/logowanie', methods=['POST'])
 def login():
     data = request.get_json()
@@ -37,23 +38,27 @@ def login():
         session['id_prefix'] = account_data['id_prefix']
         session['contact_email'] = account_data['contact_email']
         session['address'] = account_data['address']
+        session['phone'] = account_data['contact_phone']
 
         return jsonify({"message": "Pomyślnie zalogowano", "powiat": session['powiat']}), 200
     else:
         return jsonify({"message": "Nieprawidłowy e-mail lub hasło."}), 401
 
 
-@app.route('/lost_item', methods=['POST'])
+@app.route('/api/rzeczy_znalezione', methods=['POST'])
 def register_new():
     if not session.get('logged_in'):
         return jsonify({'message': 'unauthorized'}), 401
     data = request.get_json()
     data_dict = dict(data)
-    lost_item = LostItem(data_dict, session.get('id_prefix'), session.get('powiat'))
+    lost_item = LostItem(data_dict, session.get('id_prefix'), session.get('powiat'), session.get('address'), session.get('contact_email'), session.get('phone'))
     try:
-        lost_item.validate()
-        insert_lost_item(lost_item)
-        return 201
+        val, msg = lost_item.validate()
+        if val:
+            insert_lost_item(lost_item)
+            return '', 201
+        else:
+            return jsonify({'fields': msg}), 404
     except ValidationError as e:
         return jsonify({'message': e.message}), 404
 

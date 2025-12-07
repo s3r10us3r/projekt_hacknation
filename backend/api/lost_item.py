@@ -9,7 +9,8 @@ import json
 class LostItem:
     """Klasa reprezentująca pojedynczą rzecz znalezioną."""
 
-    def __init__(self, item_data: dict, id_prefix: str, powiat: str):
+    def __init__(self, item_data: dict, id_prefix: str, powiat: str, adres_odbioru: str, email: str, phone: str):
+        print('LOST ITEM CONSTRUCTOR', powiat)
         """
         Inicjalizacja obiektu z danymi wejściowymi i automatyczne
         uzupełnianie pól (np. z sesji urzędnika).
@@ -17,18 +18,15 @@ class LostItem:
         # Uzupełnianie pól z sesji/backendu
         self.id_ewidencyjny = self._generate_id(id_prefix)  # Automatycznie generowany ID
         self.data_publikacji = datetime.now().isoformat()  # Format ISO 8601 z czasem
-        # Wypełnianie pól z formularza
         self.powiat = powiat
         self.data_znalezienia = item_data.get('data_znalezienia')
         self.data_przekazania = item_data.get('data_przekazania')
         self.kategoria = item_data.get('kategoria')
         self.opis = item_data.get('opis')
-        self.powiat = item_data.get('powiat')  # Zwykle z sesji
-        self.adres_znalezienia = item_data.get('adres_znalezienia')
-        self.adres_znalezienia_opis = item_data.get('adres_znalezienia_opis')
-        self.adres_odbioru = item_data.get('adres_odbioru')  # Z sesji
-        self.email_kontaktowy = item_data.get('email_kontaktowy')  # Z sesji
-        self.telefon_kontaktowy = item_data.get('telefon_kontaktowy')
+        self.miejsce_znalezienia = item_data.get('miejsce_znalezienia')
+        self.adres_odbioru = adres_odbioru
+        self.email_kontaktowy = email
+        self.telefon_kontaktowy = phone
         self.status = item_data.get('status')
 
     def _generate_id(self, prefix: str) -> str:
@@ -47,16 +45,16 @@ class LostItem:
         Waliduje wewnętrzne dane obiektu względem zdefiniowanej JSON Schemy.
         Zgłasza wyjątek ValidationError, jeśli walidacja nie powiedzie się.
         """
-        return True
         data = self.to_dict()
         try:
             # Użycie funkcji validate z jsonschema
             schema_dict = json.loads(LOST_ITEM_SCHEMA)
             validate(instance=data, schema=schema_dict)
-            return True
+            return True, ''
         except ValidationError as e:
             # Zgłoś błąd walidacji, który aplikacja Flask może przechwycić
-            raise ValidationError(f"Błąd walidacji schemy: {e.message} w polu {e.path}")
+            print(e.message, e.path)
+            return False, list(e.path)
         except Exception as e:
             # Błędy formatu (np. daty)
             raise ValidationError(f"Ogólny błąd walidacji: {e}")

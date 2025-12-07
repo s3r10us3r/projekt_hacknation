@@ -40,15 +40,10 @@ LOST_ITEM_SCHEMA = r'''
       "description": "Nazwa powiatu, na którego terenie rzecz została znaleziona.",
       "maxLength": 50
     },
-    "adres_znalezienia": {
+    "miejsce_znalezienia": {
       "type": "string",
       "description": "Ulica/miejsce, gdzie rzecz została znaleziona.",
       "maxLength": 100
-    },
-    "adres_znalezienia_opis": {
-      "type": "string",
-      "description": "Dodatkowy opis miejsca znalezienia (np. 'w autobusie linii 175').",
-      "maxLength": 150
     },
     "adres_odbioru": {
       "type": "string",

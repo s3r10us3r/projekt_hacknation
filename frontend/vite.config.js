@@ -7,11 +7,15 @@ export default defineConfig({
   server: {
     proxy: {
       // Przekieruj zapytania API do Flaska
-      '/login': 'http://127.0.0.1:5000',
-      '/lost_item': 'http://127.0.0.1:5000',
-      '/lost_items': 'http://127.0.0.1:5000',
-      '/form_autocomplete': 'http://127.0.0.1:5000',
-      '/healt': 'http://127.0.0.1:5000',
+      '/api/konta/logowanie': 'http://127.0.0.1:5000',
+      '/api/rzeczy_znalezione': 'http://127.0.0.1:5000',
+      '/api/rzeczy_znalezione/<id_ewidencyjny>': 'http://127.0.0.1:5000',
+      '/api/narzedzia/auto_uzupelnianie': 'http://127.0.0.1:5000',
+      '/zdrowie': 'http://127.0.0.1:5000',
+      '/api/open-data': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true,
+      },
     }
   }
 })

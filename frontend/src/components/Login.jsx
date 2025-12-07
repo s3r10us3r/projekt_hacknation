@@ -13,7 +13,7 @@ export function Login({ onLogin }) {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('/login', form);
+      const res = await axios.post('/api/konta/logowanie', form);
       onLogin(res.data.powiat);
     } catch (err) {
       setError("Błędny email lub hasło.");
