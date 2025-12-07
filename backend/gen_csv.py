@@ -51,7 +51,5 @@ def get_md5(data_string):
 
 
 if __name__ == '__main__':
-    csv_data = gen_lost_items_csv()
-    print(csv_data)
-    md5 = get_md5(csv_data)
-    print(md5.hexdigest())
+    import sys
+    gen_lost_items_csv(sys.argv[1])
