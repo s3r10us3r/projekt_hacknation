@@ -101,13 +101,13 @@ def create_lost_items_table():
         # SQLITE TWORZENIE TABELI
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS lost_items (
-                id_ewidencyjny TEXT PRIMARY KEY NOT NULL,  
+                id_ewidencyjny TEXT PRIMARY KEY NOT NULL,
+                powiat TEXT NOT NULL,
                 data_znalezienia TEXT NOT NULL,
                 data_przekazania TEXT,
                 data_publikacji TEXT NOT NULL,
                 kategoria TEXT NOT NULL,
                 opis TEXT NOT NULL,
-                powiat TEXT NOT NULL,
                 adres_znalezienia TEXT,
                 adres_znalezienia_opis TEXT,
                 adres_odbioru TEXT NOT NULL,
@@ -139,6 +139,7 @@ def insert_lost_item(lost_item):
         # Przygotowanie krotki z danymi w kolejności odpowiadającej kolumnom
         data_to_insert = (
             lost_item.id_ewidencyjny,
+            lost_item.powiat,
             lost_item.data_znalezienia,
             lost_item.data_przekazania,
             lost_item.data_publikacji,
@@ -156,10 +157,10 @@ def insert_lost_item(lost_item):
         # Jawne wymienienie kolumn to dobra praktyka (chroni przed zmianą kolejności w bazie)
         sql_query = """
             INSERT INTO lost_items (
-                id_ewidencyjny, data_znalezienia, data_przekazania, data_publikacji,
+                id_ewidencyjny, powiat, data_znalezienia, data_przekazania, data_publikacji,
                 kategoria, opis, powiat, adres_znalezienia, adres_znalezienia_opis,
                 adres_odbioru, email_kontaktowy, telefon_kontaktowy, status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         
         cursor.execute(sql_query, data_to_insert)
@@ -258,13 +259,39 @@ def update_lost_item(lost_item):
         if cursor.rowcount == 0:
             print(f"⚠️ Warning: No item found with ID {lost_item.id_ewidencyjny} to update.")
             return False
-        
         print(f"✅ Updated item: {lost_item.id_ewidencyjny}")
         return True
 
     except sqlite3.Error as e:
         print(f"❌ SQLite Error during update: {e}")
         return False
+    finally:
+        if conn:
+            conn.close()
+
+
+def get_all_lost_items(powiat=None):
+    """
+    Pobiera wszystkie rekordy z tabeli lost_items.
+    Zwraca listę słowników, gdzie klucze to nazwy kolumn.
+    """
+    conn = None
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        if powiat:
+            cursor.execute("SELECT * FROM lost_items WHERE powiat = ?", (powiat,))
+        else:
+            cursor.execute("SELECT * FROM lost_items")
+
+        rows = cursor.fetchall()
+
+        items_list = [dict(row) for row in rows]
+        return items_list
+    except sqlite3.Error as e:
+        print(f"❌ Błąd SQLite podczas pobierania listy zgub: {e}")
+        return []
     finally:
         if conn:
             conn.close()
