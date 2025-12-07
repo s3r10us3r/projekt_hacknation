@@ -1,6 +1,6 @@
 from flask import Flask, request, session, jsonify, make_response
 from flasgger import Swagger
-from api.db import authenticate_user, insert_lost_item, update_lost_item, get_lost_item_by_id, create_lost_items_table, create_office_accounts_table
+from api.db import authenticate_user, insert_lost_item, update_lost_item, get_lost_item_by_id, create_lost_items_table, create_office_accounts_table, create_records_table, get_ds
 from api.lost_item import LostItem
 from jsonschema.exceptions import ValidationError
 from PIL import Image
@@ -31,7 +31,7 @@ def healt():
               type: string
               example: ok
     """
-    return jsonify({'message': 'ok'}), 200 # Zmieniono 201 na 200 (standard dla health check)
+    return jsonify({'message': 'ok'}), 200
 
 
 @app.route('/api/konta/logowanie', methods=['POST'])
@@ -71,12 +71,10 @@ def login():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
-    # ... (logika logowania) ...
     account_data = authenticate_user(email, password)
     if not email or not password:
         return jsonify({"message": "Brak danych logowania."}), 400
     if account_data:
-        # ... (zapis do sesji) ...
         session['logged_in'] = True
         session['user_id'] = account_data['user_id']
         session['powiat'] = account_data['powiat']
@@ -269,8 +267,8 @@ def get_xml(powiat_slug=None):
     return response, 200 # Używamy 200 OK
 
 
-@app.route('/api/open-data/<powiat_slug>/data.csv')
-def get_csv_endpoint(powiat_slug=None):
+@app.route('/api/open-data/<powiat_slug>/<date>/data.csv')
+def get_csv_endpoint(powiat_slug=None, date=None):
     """
     Endpoint Zasobu CSV (Główne Dane).
     ---
@@ -282,6 +280,11 @@ def get_csv_endpoint(powiat_slug=None):
         type: string
         required: true
         description: Slug powiatu (np. warszawa)
+      - name: date
+        in: path
+        type: string
+        required: true
+        description: data
       - name: If-None-Match
         in: header
         type: string
@@ -300,17 +303,12 @@ def get_csv_endpoint(powiat_slug=None):
     """
     # Dodać walidację check_powiat_exists(powiat_slug)
     # Przekazanie sluga do funkcji generującej dane
-    csv_content, cnt = gen_lost_items_csv(powiat_slug) 
-    if cnt == 0:
+    csv_row = get_ds(powiat_slug, date)
+    if not csv_row:
         return '', 404
-    
-    md5_hash = get_md5(csv_content)
-    if request.headers.get('If-None-Match') == f'"{md5_hash}"':
-        return '', 304
-    response = make_response(csv_content)
+    response = make_response(csv_row['data'])
     response.headers['Content-Type'] = 'text/csv; charset=utf-8'
     response.headers['Content-Disposition'] = f'attachment; filename=wykaz_{powiat_slug}.csv'
-    response.headers['ETag'] = f'"{md5_hash}"'
     return response, 200
 
 
@@ -323,6 +321,7 @@ def run_app():
     print("--- Inicjalizacja Bazy Danych ---")
     create_office_accounts_table()
     create_lost_items_table()
+    create_records_table()
 
     print('--- Przygotowywanie modeli AI ---')
     #if torch.cuda.is_available():

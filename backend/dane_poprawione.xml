@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<od:datasets xmlns:od="urn:otwarte-dane:harvester:1.13">
+    <dataset status="published">
+        <title>
+            <polish>Rejestr Rzeczy Znalezionych - Warszawa</polish>
+        </title>
+        <description>
+            <polish>Publiczny wykaz rzeczy znalezionych prowadzony przez urząd.</polish>
+        </description>
+        <url>http://urzad.pl/bip/rzeczy-znalezione</url>
+        <updateFrequency>daily</updateFrequency>
+        <categories>
+            <category>GOVE</category>
+        </categories>
+        <resources>
+            <resource status="published">
+                <url>http://127.0.0.1/open-data/warszawa/2025-12-05/data.csv</url>
+                <title>
+                    <polish>Wykaz Rzeczy (CSV)</polish>
+                </title>
+                <description>
+                    <polish>Plik CSV z rzeczami zagubionymi akrualny do 2025-12-05.</polish>
+                </description>
+                <availability>remote</availability>
+                <dataDate>2025-12-05</dataDate>
+            </resource>
+            <resource status="published">
+                <url>http://127.0.0.1/open-data/warszawa/2025-12-06/data.csv</url>
+                <title>
+                    <polish>Wykaz Rzeczy (CSV)</polish>
+                </title>
+                <description>
+                    <polish>Plik CSV z rzeczami zagubionymi akrualny do 2025-12-06.</polish>
+                </description>
+                <availability>remote</availability>
+                <dataDate>2025-12-06</dataDate>
+            </resource>
+            <resource status="published">
+                <url>http://127.0.0.1/open-data/warszawa/2025-12-07/data.csv</url>
+                <title>
+                    <polish>Wykaz Rzeczy (CSV)</polish>
+                </title>
+                <description>
+                    <polish>Plik CSV z rzeczami zagubionymi akrualny do 2025-12-07.</polish>
+                </description>
+                <availability>remote</availability>
+                <dataDate>2025-12-07</dataDate>
+                <hasHighValueData>true</hasHighValueData>
+            </resource>
+        </resources>
+        <tags>
+            <tag lang="pl">rzeczy znalezione</tag>
+            <tag lang="pl">zguby</tag>
+            <tag lang="pl">Warszawa</tag>
+        </tags>
+    </dataset>
+</od:datasets>

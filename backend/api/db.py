@@ -1,7 +1,111 @@
 import sqlite3
 from api.office_account import hash_password
+import json
+import hashlib
 
 DATABASE_NAME = 'hackathon_data.db'
+def create_records_table():
+    conn = None
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS records (
+                md5 TEXT,
+                date TEXT,
+                powiat TEXT,
+                data TEXT
+                );
+        ''')
+        conn.commit()
+        print("SQLite table 'records' ready.")
+        return True
+    except sqlite3.Error as e:
+        print(f"Bład sqlite rekordy", e)
+        return False
+    finally:
+        if conn:
+            conn.close()
+
+
+def insert_ds(checksum, data, date_str, powiat):
+    conn = None
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        cursor = conn.cursor()
+
+        # Przygotowanie krotki z danymi w kolejności odpowiadającej kolumnom
+        data_to_insert = (
+            checksum,
+            date_str,
+            powiat,
+            data
+        )
+
+        # Jawne wymienienie kolumn to dobra praktyka (chroni przed zmianą kolejności w bazie)
+        sql_query = """
+            INSERT INTO records (
+                md5, date, powiat, data
+            ) VALUES (?, ?, ?, ?)
+        """
+
+
+        cursor.execute(sql_query, data_to_insert)
+        conn.commit()
+        print('dodano ds')
+        return True
+    except sqlite3.IntegrityError as e:
+        print(f"❌ Błąd integralności (np. duplikat ID): {e}")
+        return False
+    except sqlite3.Error as e:
+        print(f"❌ Błąd SQLite podczas dodawania zguby: {e}")
+        return False
+    finally:
+        if conn:
+            conn.close()
+
+def get_all_datasets(powiat):
+    """
+    Pobiera wszystkie rekordy z tabeli lost_items.
+    Zwraca listę słowników, gdzie klucze to nazwy kolumn.
+    """
+    conn = None
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM records WHERE powiat = ?", (powiat,))
+        rows = cursor.fetchall()
+        items_list = [dict(row) for row in rows]
+        return items_list
+    except sqlite3.Error as e:
+        print(f"Błąd SQLite podczas pobierania rekordów: {e}")
+        return []
+    finally:
+        if conn:
+            conn.close()
+
+
+def get_ds(powiat, data_str):
+    conn = None
+    try:
+        conn = sqlite3.connect(DATABASE_NAME)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        sql_query = "SELECT * FROM records WHERE powiat = ? AND date = ?"
+        cursor.execute(sql_query, (powiat, data_str))
+        row = cursor.fetchone()
+        if row:
+            return dict(row)
+        else:
+            return None
+
+    except sqlite3.Error as e:
+        print(f"❌ SQLite Error while fetching item {powiat},{data_str}: {e}")
+        return None
+    finally:
+        if conn:
+            conn.close()
 
 
 def create_office_accounts_table():
@@ -123,6 +227,7 @@ def create_lost_items_table():
     finally:
         if conn:
             conn.close()
+
 
 
 def insert_lost_item(lost_item):

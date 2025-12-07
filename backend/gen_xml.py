@@ -1,13 +1,12 @@
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from api.db import get_all_datasets
 
 NS = "urn:otwarte-dane:harvester:1.13"
 
 
 def generate_valid_xml(powiat_slug: str):
     powiat_name = powiat_slug.replace('-', ' ').title()
-    dataset_id = f"rejestr-zgub-{powiat_slug}"
-    url_csv = f"http://127.0.0.1/open-data/{powiat_slug}/data.csv"
 
     ET.register_namespace('od', NS)
 
@@ -15,8 +14,6 @@ def generate_valid_xml(powiat_slug: str):
 
     dataset = ET.SubElement(root, "dataset")
     dataset.set("status", "published")
-
-    ET.SubElement(dataset, "extIdent").text = dataset_id[:36]
 
     title = ET.SubElement(dataset, "title")
     ET.SubElement(title, "polish").text = f"Rejestr Rzeczy Znalezionych - {powiat_name}"
@@ -31,20 +28,20 @@ def generate_valid_xml(powiat_slug: str):
     ET.SubElement(cats, "category").text = "GOVE"
 
     resources = ET.SubElement(dataset, "resources")
-    res = ET.SubElement(resources, "resource")
-    res.set("status", "published")
-
-    ET.SubElement(res, "extIdent").text = f"res-{dataset_id}"[:36]
-    ET.SubElement(res, "url").text = url_csv
-
-    res_title = ET.SubElement(res, "title")
-    ET.SubElement(res_title, "polish").text = "Wykaz Rzeczy (CSV)"
-
-    res_desc = ET.SubElement(res, "description")
-    ET.SubElement(res_desc, "polish").text = "Aktualny plik CSV z danymi."
-
-    ET.SubElement(res, "availability").text = "remote"
-    ET.SubElement(res, "dataDate").text = datetime.now().strftime("%Y-%m-%d")
+    csvs = get_all_datasets(powiat_slug)
+    for csv in csvs:
+        res = ET.SubElement(resources, "resource")
+        res.set("status", "published")
+        date_str = csv['date']
+        url_csv = f"http://127.0.0.1/open-data/{powiat_slug}/{date_str}/data.csv"
+        ET.SubElement(res, "url").text = url_csv
+        res_title = ET.SubElement(res, "title")
+        ET.SubElement(res_title, "polish").text = "Wykaz Rzeczy (CSV)"
+        res_desc = ET.SubElement(res, "description")
+        ET.SubElement(res_desc, "polish").text = f"Plik CSV z rzeczami zagubionymi akrualny do {date_str}."
+        ET.SubElement(res, "availability").text = "remote"
+        ET.SubElement(res, "dataDate").text = date_str
+    ET.SubElement(res, "hasHighValueData").text = "true"
 
     # --- Tagi ---
     tags = ET.SubElement(dataset, "tags")
