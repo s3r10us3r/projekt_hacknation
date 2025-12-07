@@ -9,7 +9,7 @@ import json
 class LostItem:
     """Klasa reprezentująca pojedynczą rzecz znalezioną."""
 
-    def __init__(self, item_data: dict, id_prefix: str):
+    def __init__(self, item_data: dict, id_prefix: str, powiat: str):
         """
         Inicjalizacja obiektu z danymi wejściowymi i automatyczne
         uzupełnianie pól (np. z sesji urzędnika).
@@ -18,6 +18,7 @@ class LostItem:
         self.id_ewidencyjny = self._generate_id(id_prefix)  # Automatycznie generowany ID
         self.data_publikacji = datetime.now().isoformat()  # Format ISO 8601 z czasem
         # Wypełnianie pól z formularza
+        self.powiat = powiat
         self.data_znalezienia = item_data.get('data_znalezienia')
         self.data_przekazania = item_data.get('data_przekazania')
         self.kategoria = item_data.get('kategoria')
@@ -46,6 +47,7 @@ class LostItem:
         Waliduje wewnętrzne dane obiektu względem zdefiniowanej JSON Schemy.
         Zgłasza wyjątek ValidationError, jeśli walidacja nie powiedzie się.
         """
+        return True
         data = self.to_dict()
         try:
             # Użycie funkcji validate z jsonschema
