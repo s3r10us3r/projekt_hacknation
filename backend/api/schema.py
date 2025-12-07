@@ -5,8 +5,8 @@ LOST_ITEM_SCHEMA = r'''
   "properties": {
     "id_ewidencyjny": {
       "type": "string",
-      "description": "Unikalny numer ewidencyjny nadany przez jednostkę samorządową (np. UM-WRO-2023-0001).",
-      "pattern": "^([A-Z]{2,4}-[A-Z]{3,5}-\\d{4}-\\d{4})$",
+      "description": "Unikalny numer ewidencyjny nadany przez jednostkę samorządową (np. WRO-2023-0001).",
+      "pattern": "^([A-Z]{2,4}-\\d{4}-\\d{4})$",
       "maxLength": 30
     },
     "data_znalezienia": {

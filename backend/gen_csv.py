@@ -5,8 +5,7 @@ import hashlib
 
 
 def gen_lost_items_csv(powiat_slug):
-    powiat_name = powiat_slug.replace('-', ' ').title()
-    lost_items = get_all_lost_items(powiat=powiat_name)
+    lost_items = get_all_lost_items(powiat=powiat_slug)
     field_names = [
         'id_ewidencyjny',
         'powiat',
@@ -15,8 +14,7 @@ def gen_lost_items_csv(powiat_slug):
         'data_publikacji',
         'kategoria',
         'opis',
-        'adres_znalezienia',
-        'adres_znalezienia_opis',
+        'miejsce_znalezienia',
         'adres_odbioru',
         'email_kontaktowy',
         'telefon_kontaktowy',
@@ -31,7 +29,7 @@ def gen_lost_items_csv(powiat_slug):
         writer.writerow(row_to_write)
     csv_content = output.getvalue()
     output.close()
-    return csv_content, len(lost_items)
+    return csv_content, len(csv_content)
 
 
 def get_md5(data_string):
